@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+    ticketing_app:
+        container_name: ticketing_app
+        build: .
+        command: /code/start.sh
+        ports:
+            - 8001:8001
