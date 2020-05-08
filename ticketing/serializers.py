@@ -13,6 +13,25 @@ class ClassSerializer(serializers.Serializer):
     )
 
 
+class LiteTicketSerializer(serializers.ModelSerializer):
+    uuid = serializers.UUIDField(read_only=True, format='hex')
+    seat = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Ticket
+        fields = (
+            'uuid',
+            'seat',
+            'flight',
+            'flight_time'
+        )
+
+    def get_seat(self, obj):
+        if isinstance(obj, Ticket):
+            return '{}{}'.format(obj.row, chr(obj.column + 64))
+        return None
+
+
 class TicketSerializer(serializers.ModelSerializer):
     rows = serializers.IntegerField(min_value=1, max_value=50, write_only=True)
     columns = serializers.IntegerField(
@@ -46,7 +65,7 @@ class TicketSerializer(serializers.ModelSerializer):
 
     def get_seat(self, obj):
         if isinstance(obj, Ticket):
-            return '{}{}'.format(obj.row, chr(obj.seat + 64))
+            return '{}{}'.format(obj.row, chr(obj.column + 64))
         return None
 
     def validate_flight(self, flight):

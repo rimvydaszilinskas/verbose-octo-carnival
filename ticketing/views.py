@@ -1,16 +1,31 @@
-from rest_framework import views, status
+from datetime import datetime, timedelta
+
+from rest_framework import views, status, generics
 from rest_framework.response import Response
 
-from .serializers import TicketSerializer, SaleSerializer
+from django.db.models import Q
+
+from .models import Ticket
+from .serializers import TicketSerializer, SaleSerializer, LiteTicketSerializer
 
 
-class View(views.APIView):
-    serializer_class = SaleSerializer
+class TicketView(generics.ListAPIView):
+    """
+    List available tickets
 
-    def post(self, request, *args, **kwargs):
-        ser = self.serializer_class(data=request.data)
-        ser.is_valid(raise_exception=True)
+    Add flight query param to filter by flight
+    """
+    serializer_class = LiteTicketSerializer
 
-        ser.save()
+    def get_queryset(self):
+        time = datetime.now() - timedelta(hours=1)
 
-        return Response(ser.data)
+        tickets = Ticket.objects.filter(
+            Q(reserved__isnull=True) | Q(reserved__lte=time)
+        ).filter(Q(sale=None) | Q(sale__paid=False))
+
+        flight = self.request.GET.get('flight', None)
+
+        if flight:
+            tickets = tickets.filter(flight=flight)
+        return tickets
