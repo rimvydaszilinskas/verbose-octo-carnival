@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from rest_framework import serializers
 
 from .constants import TicketClasses
@@ -93,3 +95,82 @@ class TicketSerializer(serializers.ModelSerializer):
     def save(self, *args, **kwargs):
         if self.instance is None:
             tickets = self.create(self.validated_data)
+
+
+class SaleTicketSerializer(serializers.Serializer):
+    uuid = serializers.UUIDField(format='hex', required=True)
+    passenger_reference = serializers.CharField(
+        max_length=64, required=True, source='passenger_ref')
+    passenger_name = serializers.CharField(max_length=64, required=True)
+
+
+class SaleSerializer(serializers.ModelSerializer):
+    uuid = serializers.UUIDField(format='hex', read_only=True)
+    customer_reference = serializers.CharField(
+        max_length=64, required=True, source='customer')
+    customer_name = serializers.CharField(
+        max_length=64, required=False)
+    tickets = SaleTicketSerializer(many=True, required=True)
+    paid = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = Sale
+        fields = (
+            'uuid',
+            'customer_reference',
+            'customer_name',
+            'tickets',
+            'paid',
+        )
+
+    def validate_tickets(self, tickets):
+        if len(tickets) == 0:
+            raise serializers.ValidationError('No tickets')
+        self.tickets = Ticket.objects.none()
+
+        time = datetime.now() - timedelta(hours=1)
+
+        for ticket in tickets:
+            t = Ticket.objects.filter(uuid=ticket['uuid'])
+
+            if not t.exists():
+                raise serializers.ValidationError(
+                    '{} ticket does not exist'.format(ticket['uuid']))
+            elif self.tickets.filter(uuid=ticket['uuid']).exists():
+                raise serializers.ValidationError(
+                    '{} duplicate ticket'.format(ticket['uuid']))
+
+            tt = t.first()
+
+            if tt.reserved and tt.reserved > time:
+                raise serializers.ValidationError(
+                    '{} ticket is reserved'.format(ticket['uuid']))
+            elif tt.sale and tt.sale.paid == True:
+                raise serializers.ValidationError(
+                    '{} ticket is sold'.format(ticket['uuid']))
+
+            self.tickets |= t
+
+        return tickets
+
+    def create(self, validated_data):
+        sale = Sale.objects.create(
+            customer=validated_data['customer'],
+            customer_name=validated_data.get('customer_name', None)
+        )
+
+        self.tickets.update(reserved=datetime.now(), sale=sale)
+
+        for t in validated_data['tickets']:
+            ticket = self.tickets.get(uuid=t['uuid'])
+            ticket.passenger_ref = t['passenger_ref']
+            ticket.passenger_name = t['passenger_name']
+            ticket.save()
+
+        return sale
+
+    def save(self, **kwargs):
+        if self.instance is None:
+            self.instance = self.create(self.validated_data)
+
+        return self.instance

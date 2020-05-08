@@ -41,6 +41,7 @@ class Sale(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     customer = models.CharField(max_length=64)
+    customer_name = models.CharField(max_length=64, null=True, blank=True)
     paid = models.BooleanField(default=False)
 
     class Meta:

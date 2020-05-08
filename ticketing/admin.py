@@ -11,6 +11,10 @@ class TicketAdmin(admin.ModelAdmin):
         'ticket_class',
     )
 
+    readonly_fields = (
+        'uuid',
+    )
+
 
 admin.site.register(Sale)
 admin.site.register(Ticket, TicketAdmin)
