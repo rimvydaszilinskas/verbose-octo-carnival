@@ -1,9 +1,26 @@
 version: '3'
 
 services:
+    ticketing_postgres:
+        image: postgres
+        restart: always
+        volumes: 
+            - ./data:/var/lib/postgres
+        environment:
+            - POSTGRES_PASSWORD=password
+            - POSTGRES_DB=ticketing
+            - POSTGRES_USER=ticketing
+    
     ticketing_app:
         container_name: ticketing_app
         build: .
         command: /code/start.sh
+        environment:
+            - DATABASE_HOST=ticketing_postgres
         ports:
             - 8001:8001
+        depends_on:
+            - ticketing_postgres
+
+volumes:
+    postgres_data:
