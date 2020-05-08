@@ -75,6 +75,24 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': '[%(asctime)s] [%(levelname)s] %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'formatter': 'standard',
+            'class': 'logging.StreamHandler'
+        }
+    }
+}
+
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 

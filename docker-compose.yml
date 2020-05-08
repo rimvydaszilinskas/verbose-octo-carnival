@@ -10,6 +10,8 @@ services:
             - POSTGRES_PASSWORD=password
             - POSTGRES_DB=ticketing
             - POSTGRES_USER=ticketing
+        ports:
+            - 5433:5432
     
     ticketing_app:
         container_name: ticketing_app

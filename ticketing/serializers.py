@@ -115,6 +115,10 @@ class TicketSerializer(serializers.ModelSerializer):
         if self.instance is None:
             tickets = self.create(self.validated_data)
 
+            return tickets
+
+        return None
+
 
 class SaleTicketSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(format='hex', required=True)
