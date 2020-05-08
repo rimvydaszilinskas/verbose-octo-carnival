@@ -8,3 +8,9 @@ class TicketClasses:
         (BUSINESS, 'Business'),
         (FIRST, 'First class'),
     )
+
+    ALL = (
+        PASSENGER,
+        BUSINESS,
+        FIRST,
+    )
