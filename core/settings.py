@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'django_extensions',
 
     'ticketing',
+
+    'logpipe',
 ]
 
 MIDDLEWARE = [
@@ -94,6 +96,7 @@ LOGGING = {
 }
 
 LOGPIPE = {
+    # Required Settings
     'OFFSET_BACKEND': 'logpipe.backend.kafka.ModelOffsetStore',
     'CONSUMER_BACKEND': 'logpipe.backend.kafka.Consumer',
     'PRODUCER_BACKEND': 'logpipe.backend.kafka.Producer',
@@ -104,7 +107,11 @@ LOGPIPE = {
         'group_id': 'django-logpipe',
     },
 
-    'DEFAULT_FORMAT': 'json',
+    # Optional Settings
+    # 'KAFKA_SEND_TIMEOUT': 10,
+    # 'KAFKA_MAX_SEND_RETRIES': 0,
+    # 'MIN_MESSAGE_LAG_MS': 0,
+    # 'DEFAULT_FORMAT': 'json',
 }
 
 # Database

@@ -1,3 +1,4 @@
+from django.db import models
 from datetime import datetime, timedelta
 
 from rest_framework import serializers
@@ -120,6 +121,14 @@ class TicketSerializer(serializers.ModelSerializer):
         return None
 
 
+    @classmethod
+    def lookup_instance(cls, uuid, **kwargs):
+        try:
+            return Ticket.objects.get(uuid=uuid)
+        except models.Ticket.DoesNotExist:
+            pass
+
+
 class SaleTicketSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(format='hex', required=True)
     passenger_reference = serializers.CharField(
@@ -197,3 +206,13 @@ class SaleSerializer(serializers.ModelSerializer):
             self.instance = self.create(self.validated_data)
 
         return self.instance
+
+    @classmethod
+    def lookup_instance(cls, uuid, **kwargs):
+        try:
+            return Sale.objects.get(uuid=uuid)
+        except models.Sale.DoesNotExist:
+            pass
+
+
+

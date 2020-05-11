@@ -24,5 +24,7 @@ services:
         depends_on:
             - ticketing_postgres
 
+
+
 volumes:
     postgres_data:
