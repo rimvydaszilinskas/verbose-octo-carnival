@@ -4,7 +4,7 @@ services:
     ticketing_postgres:
         image: postgres
         restart: always
-        volumes: 
+        volumes:
             - ./data:/var/lib/postgres
         environment:
             - POSTGRES_PASSWORD=password

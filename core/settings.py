@@ -93,6 +93,20 @@ LOGGING = {
     }
 }
 
+LOGPIPE = {
+    'OFFSET_BACKEND': 'logpipe.backend.kafka.ModelOffsetStore',
+    'CONSUMER_BACKEND': 'logpipe.backend.kafka.Consumer',
+    'PRODUCER_BACKEND': 'logpipe.backend.kafka.Producer',
+    'KAFKA_BOOTSTRAP_SERVERS': [
+        'kafka:9092'
+    ],
+    'KAFKA_CONSUMER_KWARGS': {
+        'group_id': 'django-logpipe',
+    },
+
+    'DEFAULT_FORMAT': 'json',
+}
+
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
@@ -103,7 +117,7 @@ DATABASES = {
         'USER': os.environ.get('DATABASE_USER', 'ticketing'),
         'PASSWORD': os.environ.get('DATABASE_PASSWORD', 'password'),
         'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
-        'PORT': os.environ.get('DATABASE_PORT', '')
+        'PORT': os.environ.get('DATABASE_PORT', '5433')
     }
 }
 
