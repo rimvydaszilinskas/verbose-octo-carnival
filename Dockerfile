@@ -11,3 +11,4 @@ RUN apt-get update
 COPY . /code/
 RUN pip install -r requirements.txt
 RUN chmod +x /code/start.sh
+RUN chmod +x /code/start_pipe.sh

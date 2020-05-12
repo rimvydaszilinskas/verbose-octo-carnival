@@ -11,6 +11,7 @@ lru-dict==1.1.6
 Markdown==3.2.1
 psycopg2==2.8.5
 pycodestyle==2.5.0
+python-dotenv==0.13.0
 pytz==2020.1
 six==1.14.0
 sqlparse==0.3.1

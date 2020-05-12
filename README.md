@@ -1,0 +1,1 @@
+./bin/kafka-topics.sh --create --zookeeper ticketing_zookeeper:2181 --replication-factor 1 --partitions 1 --topic tickets

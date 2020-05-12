@@ -12,6 +12,23 @@ services:
             - POSTGRES_USER=ticketing
         ports:
             - 5433:5432
+
+    ticketing_zookeeper:
+        image: wurstmeister/zookeeper
+        container_name: ticketing_zookeeper
+        ports: 
+            - 2181:2181
+    
+    ticketing_kafka:
+        image: wurstmeister/kafka
+        container_name: ticketing_kafka
+        ports:
+            - 9092:9092
+        environment:
+            - KAFKA_ADVERTISED_HOST_NAME=localhost
+            - KAFKA_ZOOKEEPER_CONNECT=ticketing_zookeeper:2181
+        depends_on:
+            - ticketing_zookeeper
     
     ticketing_app:
         container_name: ticketing_app
@@ -19,12 +36,20 @@ services:
         command: /code/start.sh
         environment:
             - DATABASE_HOST=ticketing_postgres
+            - KAFKA_SERVER=ticketing_kafka:9092
         ports:
             - 8001:8001
         depends_on:
             - ticketing_postgres
-
-
-
-volumes:
-    postgres_data:
+            - ticketing_kafka
+    
+    ticketing_kafka_listener:
+        container_name: ticketing_kafka_listener
+        build: .
+        command: /code/start_pipe.sh
+        environment:
+            - DATABASE_HOST=ticketing_postgres
+            - KAFKA_SERVER=ticketing_kafka:9092
+        depends_on:
+            - ticketing_kafka
+            - ticketing_postgres

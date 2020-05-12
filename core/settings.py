@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -39,11 +42,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'logpipe',
     'django_extensions',
 
     'ticketing',
-
-    'logpipe',
 ]
 
 MIDDLEWARE = [
@@ -96,22 +98,15 @@ LOGGING = {
 }
 
 LOGPIPE = {
-    # Required Settings
     'OFFSET_BACKEND': 'logpipe.backend.kafka.ModelOffsetStore',
     'CONSUMER_BACKEND': 'logpipe.backend.kafka.Consumer',
     'PRODUCER_BACKEND': 'logpipe.backend.kafka.Producer',
     'KAFKA_BOOTSTRAP_SERVERS': [
-        'kafka:9092'
+        os.getenv('KAFKA_SERVER', 'localhost:9092')
     ],
     'KAFKA_CONSUMER_KWARGS': {
         'group_id': 'django-logpipe',
     },
-
-    # Optional Settings
-    # 'KAFKA_SEND_TIMEOUT': 10,
-    # 'KAFKA_MAX_SEND_RETRIES': 0,
-    # 'MIN_MESSAGE_LAG_MS': 0,
-    # 'DEFAULT_FORMAT': 'json',
 }
 
 # Database
@@ -124,7 +119,7 @@ DATABASES = {
         'USER': os.environ.get('DATABASE_USER', 'ticketing'),
         'PASSWORD': os.environ.get('DATABASE_PASSWORD', 'password'),
         'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
-        'PORT': os.environ.get('DATABASE_PORT', '5433')
+        'PORT': os.environ.get('DATABASE_PORT', '')
     }
 }
 
