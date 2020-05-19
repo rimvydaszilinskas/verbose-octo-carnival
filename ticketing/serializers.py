@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from datetime import datetime, timedelta
 
 from rest_framework import serializers
@@ -35,7 +36,7 @@ class LiteTicketSerializer(serializers.ModelSerializer):
 
 
 class TicketSerializer(serializers.ModelSerializer):
-    MESSAGE_TYPE = 'tickets'
+    MESSAGE_TYPE = settings.TICKET_CREATION_MESSAGE_TYPE
     VERSION = 1
 
     rows = serializers.IntegerField(min_value=1, max_value=50, write_only=True)
@@ -133,7 +134,7 @@ class SaleTicketSerializer(serializers.Serializer):
 
 
 class SaleSerializer(serializers.ModelSerializer):
-    MESSAGE_TYPE = 'sales'
+    MESSAGE_TYPE = settings.NEW_SALE_MESSAGE_TYPE
     VERSION = 1
 
     uuid = serializers.UUIDField(format='hex', read_only=True)
@@ -216,7 +217,7 @@ class SaleSerializer(serializers.ModelSerializer):
 
 
 class AccountingSaleSerializer(serializers.ModelSerializer):
-    MESSAGE_TYPE = 'acc_sales'
+    MESSAGE_TYPE = settings.ACCOUNTING_SALE_MESSAGE_TYPE
     VERSION = 1
     KEY_FIELD = 'uuid'
 

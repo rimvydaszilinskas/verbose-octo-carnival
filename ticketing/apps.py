@@ -1,4 +1,6 @@
 from django.apps import AppConfig
+from django.conf import settings
+
 from logpipe import Consumer, register_consumer
 
 
@@ -10,7 +12,7 @@ class TicketingConfig(AppConfig):
 def ticket_consumer():
     from .serializers import TicketSerializer
 
-    consumer = Consumer('tickets')
+    consumer = Consumer(settings.TICKET_CREATION_TOPIC)
     consumer.register(TicketSerializer)
     return consumer
 
@@ -19,7 +21,7 @@ def ticket_consumer():
 def new_sale_consumer():
     from .serializers import SaleSerializer
 
-    consumer = Consumer('sales')
+    consumer = Consumer(settings.NEW_SALE_TOPIC)
     consumer.register(SaleSerializer)
     return consumer
 
@@ -28,6 +30,6 @@ def new_sale_consumer():
 def sale_consumer():
     from .serializers import AccountingSaleSerializer
 
-    consumer = Consumer('acc_sales')
+    consumer = Consumer(settings.ACCOUNTING_SALE_TOPIC)
     consumer.register(AccountingSaleSerializer)
     return consumer

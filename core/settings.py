@@ -170,3 +170,13 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# KAFKA CONSTANTS
+TICKET_CREATION_TOPIC = os.environ.get('TICKET_CREATION_TOPIC', 'tickets')
+TICKET_CREATION_MESSAGE_TYPE = os.environ.get(
+    'TICKET_CREATION_MESSAGE_TYPE', 'tickets')
+NEW_SALE_TOPIC = os.environ.get('NEW_SALE_TOPIC', 'sales')
+NEW_SALE_MESSAGE_TYPE = os.environ.get('NEW_SALE_MESSAGE_TYPE', 'sales')
+ACCOUNTING_SALE_TOPIC = os.environ.get('ACCOUNTING_SALE_TOPIC', 'acc_sales')
+ACCOUNTING_SALE_MESSAGE_TYPE = os.environ.get(
+    'ACCOUNTING_SALE_MESSAGE_TYPE', 'acc_sales')
