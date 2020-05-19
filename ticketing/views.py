@@ -29,3 +29,12 @@ class TicketView(generics.ListAPIView):
         if flight:
             tickets = tickets.filter(flight=flight)
         return tickets
+
+
+class SaleTest(views.APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = SaleSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)

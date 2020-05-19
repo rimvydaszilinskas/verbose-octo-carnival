@@ -13,3 +13,21 @@ def ticket_consumer():
     consumer = Consumer('tickets')
     consumer.register(TicketSerializer)
     return consumer
+
+
+@register_consumer
+def new_sale_consumer():
+    from .serializers import SaleSerializer
+
+    consumer = Consumer('sales')
+    consumer.register(SaleSerializer)
+    return consumer
+
+
+@register_consumer
+def sale_consumer():
+    from .serializers import AccountingSaleSerializer
+
+    consumer = Consumer('acc_sales')
+    consumer.register(AccountingSaleSerializer)
+    return consumer

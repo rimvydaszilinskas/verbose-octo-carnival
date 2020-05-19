@@ -47,6 +47,7 @@ services:
         container_name: ticketing_kafka_listener
         build: .
         command: /code/start_pipe.sh
+        restart: always
         environment:
             - DATABASE_HOST=ticketing_postgres
             - KAFKA_SERVER=ticketing_kafka:9092

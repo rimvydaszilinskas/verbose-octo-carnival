@@ -5,6 +5,7 @@ from rest_framework import serializers
 
 from .constants import TicketClasses
 from .models import Ticket, Sale
+from .utils import send_to_acc
 
 
 class ClassSerializer(serializers.Serializer):
@@ -36,7 +37,6 @@ class LiteTicketSerializer(serializers.ModelSerializer):
 class TicketSerializer(serializers.ModelSerializer):
     MESSAGE_TYPE = 'tickets'
     VERSION = 1
-    # KEY_FIELD = 'uuid'
 
     rows = serializers.IntegerField(min_value=1, max_value=50, write_only=True)
     columns = serializers.IntegerField(
@@ -124,14 +124,6 @@ class TicketSerializer(serializers.ModelSerializer):
 
         return None
 
-    # @classmethod
-    # def lookup_instance(cls, uuid, **kwargs):
-    #     print(uuid, kwargs)
-    #     try:
-    #         return Ticket.objects.get(uuid=uuid)
-    #     except Ticket.DoesNotExist:
-    #         pass
-
 
 class SaleTicketSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(format='hex', required=True)
@@ -141,6 +133,9 @@ class SaleTicketSerializer(serializers.Serializer):
 
 
 class SaleSerializer(serializers.ModelSerializer):
+    MESSAGE_TYPE = 'sales'
+    VERSION = 1
+
     uuid = serializers.UUIDField(format='hex', read_only=True)
     customer_reference = serializers.CharField(
         max_length=64, required=True, source='customer')
@@ -178,12 +173,13 @@ class SaleSerializer(serializers.ModelSerializer):
 
             tt = t.first()
 
-            if tt.reserved and tt.reserved > time:
-                raise serializers.ValidationError(
-                    '{} ticket is reserved'.format(ticket['uuid']))
-            elif tt.sale and tt.sale.paid == True:
-                raise serializers.ValidationError(
-                    '{} ticket is sold'.format(ticket['uuid']))
+            if tt.sale:
+                if tt.reserved and tt.reserved > time:
+                    raise serializers.ValidationError(
+                        '{} ticket is reserved'.format(ticket['uuid']))
+                elif tt.sale.paid == True:
+                    raise serializers.ValidationError(
+                        '{} ticket is sold'.format(ticket['uuid']))
 
             self.tickets |= t
 
@@ -208,11 +204,62 @@ class SaleSerializer(serializers.ModelSerializer):
     def save(self, **kwargs):
         if self.instance is None:
             self.instance = self.create(self.validated_data)
-
+            send_to_acc(self.instance)
         return self.instance
 
     @classmethod
-    def lookup_instance(cls, uuid, **kwargs):
+    def lookup_instance(cls, uuid=None, **kwargs):
+        try:
+            return Sale.objects.get(uuid=uuid)
+        except Sale.DoesNotExist:
+            pass
+
+
+class AccountingSaleSerializer(serializers.ModelSerializer):
+    MESSAGE_TYPE = 'acc_sales'
+    VERSION = 1
+    KEY_FIELD = 'uuid'
+
+    uuid = serializers.UUIDField(format='hex', required=True)
+    paid = serializers.BooleanField(required=True)
+    customer = serializers.CharField(read_only=True)
+    tickets = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Sale
+        fields = (
+            'uuid',
+            'paid',
+            'customer',
+            'tickets',
+        )
+
+    def get_tickets(self, obj):
+        pas = obj.tickets.filter(ticket_class=TicketClasses.PASSENGER).count()
+        bus = obj.tickets.filter(ticket_class=TicketClasses.BUSINESS).count()
+        first = obj.tickets.filter(ticket_class=TicketClasses.FIRST).count()
+
+        return {
+            'passsenger': pas,
+            'business': bus,
+            'first': first
+        }
+
+    def update(self, instance, validated_data):
+        self.instance.paid = validated_data['paid']
+        self.instance.save(update_fields=['paid'])
+        return self.instance
+
+    def save(self):
+        if not self.instance:
+            print('no instance')
+            return
+
+        self.instance = self.update(self.instance, self.validated_data)
+        return self.instance
+
+    @classmethod
+    def lookup_instance(cls, uuid=None, **kwargs):
         try:
             return Sale.objects.get(uuid=uuid)
         except Sale.DoesNotExist:
