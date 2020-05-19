@@ -107,6 +107,7 @@ LOGPIPE = {
     'KAFKA_CONSUMER_KWARGS': {
         'group_id': 'django-logpipe',
     },
+    'DEFAULT_FORMAT': 'json'
 }
 
 # Database

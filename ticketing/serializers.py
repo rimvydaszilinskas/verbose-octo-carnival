@@ -36,7 +36,7 @@ class LiteTicketSerializer(serializers.ModelSerializer):
 class TicketSerializer(serializers.ModelSerializer):
     MESSAGE_TYPE = 'tickets'
     VERSION = 1
-    KEY_FIELD = 'uuid'
+    # KEY_FIELD = 'uuid'
 
     rows = serializers.IntegerField(min_value=1, max_value=50, write_only=True)
     columns = serializers.IntegerField(
@@ -124,12 +124,13 @@ class TicketSerializer(serializers.ModelSerializer):
 
         return None
 
-    @classmethod
-    def lookup_instance(cls, uuid, **kwargs):
-        try:
-            return Ticket.objects.get(uuid=uuid)
-        except Ticket.DoesNotExist:
-            pass
+    # @classmethod
+    # def lookup_instance(cls, uuid, **kwargs):
+    #     print(uuid, kwargs)
+    #     try:
+    #         return Ticket.objects.get(uuid=uuid)
+    #     except Ticket.DoesNotExist:
+    #         pass
 
 
 class SaleTicketSerializer(serializers.Serializer):
