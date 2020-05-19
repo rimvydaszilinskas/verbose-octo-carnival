@@ -67,3 +67,35 @@ json:{
         }
     }
 ```
+
+### Create new tickets
+
+```json
+{
+    "rows": 3,
+    "columns": 2,
+    "flight": "1234",
+    "classes": [
+        {
+            "class_type": "1",
+            "rows": [
+                1
+            ]
+        },
+           {
+            "class_type": "2",
+            "rows": [
+                2
+            ]
+        },
+    ]
+}
+```
+
+This will create:
+
+```
+1A 1B - Business class
+2A 2B - First class
+3A 3B - Passenger class
+```
