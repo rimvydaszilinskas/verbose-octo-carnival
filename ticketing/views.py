@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from django.db.models import Q
 
-from .models import Ticket
+from .models import Ticket, Sale
 from .serializers import TicketSerializer, SaleSerializer, LiteTicketSerializer
 
 
@@ -29,3 +29,41 @@ class TicketView(generics.ListAPIView):
         if flight:
             tickets = tickets.filter(flight=flight)
         return tickets
+
+
+class SpecificTicketView(generics.ListAPIView):
+    """
+    List a specific ticket
+
+    """
+    serializer_class = TicketSerializer
+
+    def get_queryset(self):
+        sales = Sale.objects.all()
+
+        purchased_tickets = self.request.GET.get('purchased_tickets', None)
+
+        if purchased_tickets:
+            sales = sales.filter(purchased_tickets=purchased_tickets)
+        return sales
+
+
+class CustomerPurchaseView(generics.ListAPIView):
+    """
+    List all customer purchase sales
+
+    """
+    serializer_class = SaleSerializer
+
+    def get_queryset(self):
+        sales = Sale.objects.filter(
+            Q(reserved__isnull=True)
+        ).filter(Q(sale=True) | Q(sale__paid=True))
+
+        purchased_tickets = self.request.GET.get('purchased_tickets', None)
+
+        if purchased_tickets:
+            sales = sales.filter(purchased_tickets=purchased_tickets)
+        return sales
+
+
