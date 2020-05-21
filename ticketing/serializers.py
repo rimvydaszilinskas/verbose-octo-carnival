@@ -212,7 +212,8 @@ class SaleSerializer(serializers.ModelSerializer):
     def save(self, **kwargs):
         if self.instance is None:
             self.instance = self.create(self.validated_data)
-            send_to_acc(self.instance)
+            if not settings.TESTING:
+                send_to_acc(self.instance)
         return self.instance
 
     @classmethod
