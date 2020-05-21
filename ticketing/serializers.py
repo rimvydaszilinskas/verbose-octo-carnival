@@ -129,8 +129,15 @@ class TicketSerializer(serializers.ModelSerializer):
 class SaleTicketSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(format='hex', required=True)
     passenger_reference = serializers.CharField(
-        max_length=64, required=True, source='passenger_ref')
+        max_length=64, required=True, source='passenger_ref', write_only=True)
     passenger_name = serializers.CharField(max_length=64, required=True)
+    checked_in = serializers.DateTimeField(read_only=True)
+    seat = serializers.SerializerMethodField()
+
+    def get_seat(self, obj):
+        if isinstance(obj, Ticket):
+            return '{}{}'.format(obj.row, chr(obj.column + 64))
+        return None
 
 
 class SaleSerializer(serializers.ModelSerializer):
@@ -245,6 +252,15 @@ class AccountingSaleSerializer(serializers.ModelSerializer):
             'business': bus,
             'first': first
         }
+
+    def validate(self, attrs):
+        if self.instance:
+            time = datetime.now() - timedelta(hours=1)
+
+            if self.instance.created_at < time:
+                raise serializers.ValidationError('Sale expired')
+
+        return attrs
 
     def update(self, instance, validated_data):
         self.instance.paid = validated_data['paid']

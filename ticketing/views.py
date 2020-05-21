@@ -4,6 +4,7 @@ from rest_framework import views, status, generics
 from rest_framework.response import Response
 
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 
 from .models import Ticket, Sale
 from .serializers import TicketSerializer, SaleSerializer, LiteTicketSerializer
@@ -31,39 +32,41 @@ class TicketView(generics.ListAPIView):
         return tickets
 
 
-class SpecificTicketView(generics.ListAPIView):
+class SpecificTicketView(generics.RetrieveAPIView):
     """
     List a specific ticket
-
     """
     serializer_class = TicketSerializer
 
-    def get_queryset(self):
-        sales = Sale.objects.all()
+    def get_object(self):
+        return get_object_or_404(Ticket, uuid=self.kwargs['uuid'], sale__paid=True)
 
-        purchased_tickets = self.request.GET.get('purchased_tickets', None)
+    def post(self, request, *args, **kwargs):
+        ticket = self.get_object()
 
-        if purchased_tickets:
-            sales = sales.filter(purchased_tickets=purchased_tickets)
-        return sales
+        if ticket.checked_in is not None:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={'detail': 'Ticket already checked in'})
+
+        ticket.checked_in = True
+        ticket.save(update_fields=['checked_in'])
+
+        return Response(self.serializer_class(ticket).data)
 
 
 class CustomerPurchaseView(generics.ListAPIView):
     """
     List all customer purchase sales
-
     """
     serializer_class = SaleSerializer
 
     def get_queryset(self):
         sales = Sale.objects.filter(
-            Q(reserved__isnull=True)
-        ).filter(Q(sale=True) | Q(sale__paid=True))
+            paid=True, customer=self.kwargs['customer'])
 
-        purchased_tickets = self.request.GET.get('purchased_tickets', None)
-
-        if purchased_tickets:
-            sales = sales.filter(purchased_tickets=purchased_tickets)
         return sales
 
 
+class SaleView(generics.RetrieveAPIView):
+    serializer_class = SaleSerializer
+    queryset = Sale.objects.all()
+    lookup_field = 'uuid'
